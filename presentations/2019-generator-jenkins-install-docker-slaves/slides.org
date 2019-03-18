@@ -1,0 +1,1120 @@
+#+TITLE:  Research Development Toolkit
+#+AUTHOR: Authors
+#+DATE:
+
+#+OPTIONS: toc:nil num:nil timestamp:nil
+#+OPTIONS: reveal_history:t reveal_rolling_links:t reveal_center:nil
+
+#+MACRO: color     @@html:<span style="color: $1">$2</span>@@
+#+MACRO: highlight @@html:<span class="fragment highlight-$1">@@$2@@html:</span>@@
+#+MACRO: emph      @@html:<span style="color: #1b91ff; font-weight: bold">@@$1@@html:</span>@@
+
+#+REVEAL_ROOT:      ./reveal.js
+#+REVEAL_PLUGINS:   (notes)
+#+REVEAL_THEME:     simple
+
+#+REVEAL_TRANS:     slide
+#+REVEAL_MARGIN:    0.0
+#+REVEAL_MIN_SCALE: .2
+#+REVEAL_MAX_SCALE: 1.1
+#+REVEAL_EXTRA_CSS: style.css
+
+* Introduction
+
+** Motivation -- Heterogeneity
+   :PROPERTIES:
+   :CUSTOM_ID: introduction-heterogeneity
+   :END:
+
+   {{{emph(Software systems)}}} in a scientific context:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + {{{emph(Large)}}}: Often tens to hundreds of software components
+
+   + {{{emph(Heterogeneous)}}}: Hosting solutions, version control
+     systems, programming languages, build systems, licenses,
+     maintenance models, 3rd party/1st party, legacy components
+
+   + {{{emph(Complex)}}}: Dependency structure, versions, variability
+
+   #+ATTR_REVEAL: :frag appear
+   {{{emph(Researchers)}}} develop software in many different ways:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Everyone tries to use best suited technologies and process
+
+   + Different non-functional requirements (documentation,
+     maintainability, maturity, level of professionalism in
+     development process)
+
+   + Teams set up their own CI, sometimes repository hosting --
+     centralized IT services focus on other aspects
+
+   #+BEGIN_NOTES
+     + CSRA: Smart Homer, distributed
+
+     + Cogimon: Robot Control, real-time
+   #+END_NOTES
+
+** Introduction -- Example System
+
+   #+ATTR_HTML: style="width: 100%"
+   [[file:figures/cogimon-core-ros-nightly.png]]
+
+** Introduction -- Related Work
+   :PROPERTIES:
+   :CUSTOM_ID: introduction-related-work
+   :END:
+
+   |                 | lock-in | repro | multi | 3rd party | UX | knowledge              |
+   |-----------------+---------+-------+-------+-----------+----+------------------------|
+   | TFS             | ?       | -     | ?     | ?         | +  | server(?)              |
+   | Azure DevOPS    | ?       | -     | ?     | -(?)      | +  | repository             |
+   | GitHub + Travis | -       | -     | -     | -         | ~  | repository             |
+   | Jenkins         | ~       | +     | ~     | +         | ~  | server or project repo |
+   | ROS ecosystem   | -       | -     | +     | +         | ~  | ?                      |
+   | YCM             | -       | ?     | ?     | ?         | ~  | project repo           |
+
+   #+BEGIN_NOTES
+   + es geht um Achsen und Spektrum, nicht konkrete Bewertung
+
+   + andere Achsen wären auch möglich gewesen, z.B. Homebrew
+   #+END_NOTES
+
+** Introduction -- Goal
+   :PROPERTIES:
+   :CUSTOM_ID: motivation-goal
+   :END:
+
+   Bringing together multiple usually disparate aspects:
+
+   + Organizational, social and historical aspects of projects
+
+   + Versioning (across version control systems and repository hosting solutions)
+
+   + Build system-level dependencies (across build systems and programming languages)
+
+   to facilitate
+
+   + Construction and testing
+
+   + Deployment
+
+   + (Re-)use and reproducibility
+
+   + Documentation
+
+   + Dissemination
+
+   of large, heterogeneous, complex research software system
+
+** Agenda for this Presentation
+   :PROPERTIES:
+   :CUSTOM_ID: introduction-agenda
+   :END:
+
+   + General approach
+
+     #+ATTR_REVEAL: :frag (highlight-blue highlight-blue none none none none) :frag_idx (2 2 2 2 2 2)
+     + System description model and language
+
+     + Dependency and metadata analysis
+
+     + Repository server, collaboration process
+
+     + Operations
+
+     + Reproducibility of software, experiments and publications
+
+     + Best practices
+
+   + Specific aspects
+
+     #+ATTR_REVEAL: :frag (highlight-blue highlight-blue highlight-blue none) :frag_idx (2 2 2 2)
+     + Build generator tool
+
+     + Bootstrapping
+
+     + Docker slave configuration
+
+     + Research software catalog
+
+* Description Language
+
+** Description Language -- Concepts
+   :PROPERTIES:
+   :CUSTOM_ID: language-concepts
+   :END:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + {{{emph(Project)}}} in this context:
+
+     + Logical, organizational concept
+
+     + Has a history, has versions, one or more manifestations (Example: RSB middleware used to live in a Redmine, now GitHub)
+
+     + Cannot be built or executed
+
+   + {{{emph(Project Version)}}} in this context:
+
+     + Concrete, consists of source code artifacts
+
+     + Often a particular revision in a particular repository
+
+     + Can be built, producing one (or more) {{{emph(components)}}}
+
+   + {{{emph(Distribution)}}} in this context:
+
+     + Collection of {{{emph(project versions)}}} that can be built, deployed and used together
+
+     + Can be built, producing a {{{emph(system)}}} consisting of {{{emph(components)}}}
+
+** Domain: Research Software Systems
+   :PROPERTIES:
+   :CUSTOM_ID: language-domain
+   :END:
+
+   Core domain concepts:
+
+   + {{{emph(Project)}}}, {{{emph(Project Version)}}}, {{{emph(Distribution)}}}
+
+   + System, Component
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   Other important (domain) concepts:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Dependency
+
+   + Required, provided feature
+
+   + Target platform
+
+   + Variability
+
+   + Composition
+
+   + Generalization
+
+   + Build step description
+
+   + Metadata
+
+   + Person, Role
+
+** Simplified Meta Model
+   :PROPERTIES:
+   :CUSTOM_ID: language-metamodel
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/meta-model.png :cache yes
+     hide empty methods
+     hide circle
+
+     class "template" {
+       variables
+     }
+
+     class "aspect" {
+       variables
+     }
+
+     "template" "1" *--> "*" "aspect"
+
+     class "project" {
+       name
+       variables
+     }
+
+     "project" "1" --> "*" "template" : "uses"
+
+     class "project-version" {
+       name
+       variables
+       repository
+       branch
+     }
+
+     "project" "1" *-right-> "*" "project-version"
+
+     class "feature" {
+       nature
+       name
+       version
+     }
+
+     "project-version" "*" o-down-> "*" "feature" : "platfom-requires"
+     "project-version" "*" o-down-> "*" "feature" : "requires"
+     "project-version" "*" o-down-> "*" "feature" : "provides"
+
+     "project-version" "*" --> "*" "project-version" : "depends-on"
+
+     class "distribution" {
+       name
+       variables
+     }
+
+     "distribution" "1" o--> "*" "distribution"    : "includes"
+     "distribution" "1" o--> "*" "project-version" : "includes"
+
+     class "variable-entry" {
+       name
+     }
+
+     class "expression" {
+     }
+
+     "variable-entry" o--> "expression"
+
+     class "text" {
+     }
+
+     class "list" {
+     }
+
+     class "variable-reference" {
+     }
+
+     class "scalar-ref" {
+     }
+
+     class "splicing-ref" {
+     }
+
+     class "delegation-ref" {
+     }
+
+     "expression" <|-- "text"
+     "expression" <|-- "list"
+     "expression" <|-- "variable-reference"
+     "variable-reference" <|-- "scalar-ref"
+     "variable-reference" <|-- "splicing-ref"
+     "variable-reference" <|-- "delegation-ref"
+   #+END_SRC
+
+   #+RESULTS[a297eb0213914fd9e819603a07fab5d7752180ca]:
+   [[file:figures/meta-model.png]]
+
+   #+BEGIN_NOTES
+   bringt aspekte zusammen: repository, versionen, asbhängigkeiten auf build-system ebene
+   beispiele für repositories
+   beispiele für features
+   #+END_NOTES
+
+** Recipes -- Concrete Syntax
+   :PROPERTIES:
+   :CUSTOM_ID: syntax
+   :END:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + {{{emph(Recipes)}}} describe instances of metamodel concepts:
+
+     + Project recipes: Projects and project versions
+
+     + Distribition recipes: Distributions
+
+     + Template recipes: Templates and aspects
+
+     + Person recipes: People
+
+   + Recipe syntax is based on [[https://yaml.org][YAML]]
+
+     #+BEGIN_SRC yaml -n
+       # Comments! Take that JSON!
+       scalar: |
+         Long text with "" and '' and even \
+       list:
+         - first
+         - second
+       mapping:
+         key: value
+     #+END_SRC
+
+   #+REVEAL: split
+
+   + Each recipe kind has a schema which, among other things,
+     organizes the recipe into sections:
+
+     #+BEGIN_SRC yaml
+       catalog:
+         …
+       variables:
+         …
+       include:
+         …
+       versions:
+         …
+     #+END_SRC
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Variable substitution syntax
+
+     + Scalar reference: ~${NAME|DEFAULT}~
+
+     + Splicing reference: ~@{NAME|DEFAULT}~
+
+     + Delegation: ~${next-value|DEFAULT}~
+
+** Recipes -- Example
+   :PROPERTIES:
+   :CUSTOM_ID: recipes
+   :END:
+
+    *Project Recipe* =rsb-cpp.project=
+
+    #+BEGIN_SRC yaml -n
+      templates:                        # Generalization
+      - github
+      - cmake-cpp
+
+      variables:
+      recipe.maintainer:                # People
+      - Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+      access: public                    # Metadata
+
+      github.user: open-rsx             # Repository
+      github.project: rsb-cpp
+
+      branches: [ master ]              # Minimal specification of versions
+    #+END_SRC
+
+     #+ATTR_REVEAL: :frag appear :frag_idx 2
+    *Distribution Recipe* =my-distribution.distribution=
+
+    #+ATTR_REVEAL: :frag appear :frag_idx 2
+    #+BEGIN_SRC yaml -n
+      include:
+      - other-distribution              # Composition
+
+      versions:
+      - name: rsb-cpp
+        versions:
+        - version: master
+        - parameters:                   # Variability
+          cmake.options:
+          - '@{next-value|[]}'
+          - CMAKE_BUILD_TYPE=Debug
+      - rsb-python@master
+    #+END_SRC
+
+** Recipes -- Repository
+   :PROPERTIES:
+   :CUSTOM_ID: recipes-repository
+   :END:
+
+   One aspect of the {{{emph(Cognitive Interaction Toolkit)}}} is a
+   shared repository of recipes describing software projects and
+   software systems:
+
+   #+BEGIN_SRC bash :exports none :var citk_dir="/home/jmoringe/code/citec/citk/recipes" :var type="distribution"
+     find "${citk_dir}" -type f -name "*.${type}" | wc -l
+   #+END_SRC
+
+   #+RESULTS:
+   : 207
+
+   #+BEGIN_SRC bash :exports none :var citk_dir="/home/jmoringe/code/citec/citk/recipes"
+     ( cd "${citk_dir}" && git rev-list --count master )
+   #+END_SRC
+
+   #+RESULTS:
+   : 9007
+
+   #+BEGIN_SRC bash :exports none
+     cd "/home/jmoringe/code/citec/citk/recipes"
+     git --no-pager log --max-count=999999999 '--pretty=format:%an' origin/master | sort | uniq | wc -l
+   #+END_SRC
+
+   #+RESULTS:
+   : 108
+
+   |                        |  <r> |
+   | Recipes                | 1580 |
+   | ├─Project Recipes      | 1380 |
+   | └─Distribution Recipes |  200 |
+   | Commits                | 9000 |
+   | Contributors           |  100 |
+   #+TBLFM: @2$2=@3$2+@4$2
+
+** Recipes -- Demo
+   :PROPERTIES:
+   :CUSTOM_ID:         demo-recipes
+   :REVEAL_BACKGROUND: #e8e8ff
+   :END:
+
+* Dependency and Metadata Analysis
+
+** Automatic Analysis -- Motivation
+   :PROPERTIES:
+   :CUSTOM_ID: analysis-motivation
+   :END:
+
+   Concise recipes are enabled by {{{emph(automatic analysis)}}}.
+
+   #+ATTR_REVEAL: :frag appear
+   By inspecting a particular revision in the repository associated to
+   a project version, {{{emph(automatically)}}} determine the
+   following information (so recipe authors do not have to explicitly
+   declare it):
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Dependencies ::
+
+     + Provided features (ideally with versions and scope)
+
+     + Required features (ideally with versions and scope)
+
+   + Metadata ::
+
+     + People (authors, maintainers, committers)
+
+     + License(s)
+
+     + Description
+
+     + Access restrictions
+
+   + Build Steps ::
+
+     + Names of modules
+
+     + Produced artifacts
+
+** Automatic Analysis -- Dependency Model
+   :PROPERTIES:
+   :CUSTOM_ID: dependency-model
+   :END:
+
+   + Feature: triple ({{{color(#a04040,nature)}}}, {{{color(#40a040,target)}}}[, {{{color(#4040a0,version)}}}])
+   + Project versions provide features (usually versioned)
+   + Project versions require features (versioned or unversioned)
+   + System packages provide features
+
+   #+BEGIN_SRC plantuml :file figures/requires-provides.png :cache yes
+     scale 1024 width
+
+     component [System] as system
+     () "<color:#a04040>program</color>:<color:#40a040>foo</color>:<color:#4040a0>0.1.0</color>" as foo
+     system - foo : "provides"
+
+     component [Project A Version 1.2.3] as project1
+     () "<color:#a04040>cmake</color>:<color:#40a040>project1</color>:<color:#4040a0>1.2.3</color>" as cmakeproject1
+     () "<color:#a04040>pkg-config</color>:<color:#40a040>project1</color>:<color:#4040a0>1.2.3</color>" as pkgproject1
+     project1 -down- cmakeproject1 : "provides"
+     project1 -down- pkgproject1 : "provides"
+     project1 -left-> foo : "requires"
+
+     component [Project B Version 1.0] as project2
+     project2 -up-> cmakeproject1 : "requires <color:#4040a0>1.2.0</color>"
+     project2 .up.> project1 : "depends-on"
+   #+END_SRC
+
+   #+ATTR_HTML: style="width: 90%"
+   #+RESULTS[0e15545729474e9fda28eb0b8fe575a702f824e3]:
+   [[file:figures/requires-provides.png]]
+
+** Automatic Analysis -- Examples
+   :PROPERTIES:
+   :CUSTOM_ID: dependency-analysis
+   :END:
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 1
+   *CMake*
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 1
+   #+BEGIN_SRC cmake -n
+     project(myproject VERSION 1.2       # provides cmake:myproject:1.2
+                       LANGUAGES C C++)  # metadata
+
+     find_package(alibrary 1.0 REQUIRED) # requires cmake:alibrary:1.0
+
+     pkg_search_modules(another_library) # requires pkg-config:another_library
+   #+END_SRC
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   *Maven*
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   #+BEGIN_SRC xml -n
+     <project>
+       …
+       <licenses>…</licenses>         <!-- metadata -->
+       <organization>…</organization>
+       …
+       <groupId>open-rsx</groupId>    <!-- provides maven:open-rsx/rsb:0.18 -->
+       <artifactId>rsb</artifactId>
+       <version>0.18</version>
+       …
+       <dependencies>
+         <dependency>                 <!-- requires maven:junit/junit:1.0 -->
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>1.0</version>
+         </dependency>
+       </dependencies>
+       …
+     </project>
+   #+END_SRC
+
+   #+REVEAL: split
+
+   *Python Setuptools*
+
+   #+BEGIN_SRC python -n
+     setup(name        = 'rsb',             # provides setuptools:rsb:0.18
+           version     = '0.18',
+
+           description = "Event-driven …",  # metadata
+           author      = 'Johannes Wienke',
+           license     = 'LGPLv3+',
+
+           install_requires = [             # requires setuptools:protobuf:2.8
+               'protobuf>=2.8'
+           ]
+           …
+           )
+   #+END_SRC
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   *ROS Package*
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   #+BEGIN_SRC xml -n
+     <package>
+       <name>robo_nav</name>                <!-- provides ros-package:robo_nav:0.1 -->
+       <version>0.1</version>
+
+       <description>…</description>         <!-- metadata -->
+       <maintainer email="…">…</maintainer>
+       <author email="…">…</author>
+       <license>BSD</license>
+
+       <build_depend>                       <!-- requires ros-package:path_planner -->
+         path_planner
+       </build_depend>
+     </package>
+   #+END_SRC
+
+** Automatic Analysis -- Limitations and Strategies
+   :PROPERTIES:
+   :CUSTOM_ID: analysis-limitations
+   :END:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Accuracy of automatic analysis results depends on project type:
+
+     + Complete and exact (Maven, ROS packages, pkg-config)
+
+     + Potentially incomplete and Heuristic (CMake, Python setuptools)
+
+   + Thus: recipe authors can help out:
+
+     #+BEGIN_SRC yaml -n
+       extra-requires:
+         - '@{next-value|[]}'
+         - nature:
+           target:
+           version:
+     #+END_SRC
+
+     ~extra-requires~, ~extra-provides~ take part in delegation and
+     are merged with results of automatic analysis
+
+   + Also an extension point: analysis strategies for new project
+     natures can be added
+
+   + Future work (proof-of-concept stage): limited interpretation for
+     complicated cases for CMake and Python setuptools
+
+** Platform Requirements
+   :PROPERTIES:
+   :CUSTOM_ID: analysis-platform-requirements
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/platform-hierarchy.png :cache yes
+     hide empty methods
+     hide circle
+
+     class "linux" {
+     }
+     class "debian-like" {
+     }
+     class "ubuntu" {
+     }
+     class "xenial" {
+     }
+     class "bionic" {
+     }
+     class "arch" {
+     }
+
+     "linux" <|-down- "debian-like"
+     "debian-like" <|-down- "ubuntu"
+     "ubuntu" <|-down- "xenial"
+     "ubuntu" <|-down- "bionic"
+     "linux" <|-down- "arch"
+   #+END_SRC
+
+   #+ATTR_HTML: :align right
+   #+RESULTS[95282d9105ff17cd517dd5c2c4e3364faa319105]:
+   [[file:figures/platform-hierarchy.png]]
+
+   @@html:<div style="width: 70%">@@
+   + Declaration
+
+     #+BEGIN_SRC yaml -n
+       variables:
+         platform-requires:
+           ubuntu:
+             packages:
+             - '@{next-value}'
+             - gcc
+             bionic:
+               packages:
+               - '@{next-value}'
+               - clang
+     #+END_SRC
+
+   + Merged according to platform hierarchy
+
+   + Can be declared in
+
+     + Project recipes
+
+     + {{{emph(Template recipes)}}}. For example, all Maven projects
+       need a JDK
+
+   + Future improvement: further automation based on required features
+   @@html:</div>@@
+
+** Catalog
+   :PROPERTIES:
+   :CUSTOM_ID: analysis-catalog
+   :END:
+
+   Automatic analysis and metadata is also useful for humans:
+
+   #+ATTR_HTML: :width 70%
+   [[file:figures/catalog-screenshot-project.png]]
+
+   #+REVEAL: split
+
+   #+ATTR_HTML: :width 70%
+   [[file:figures/catalog-screenshot-distribution.png]]
+
+** Analysis -- Demo
+   :PROPERTIES:
+   :CUSTOM_ID:         analysis-demo
+   :REVEAL_BACKGROUND: #e8e8ff
+   :END:
+
+   + Analyzing a repository
+
+     #+BEGIN_SRC bash
+       ./build-generator analyze https://github.com/open-rsx/rsb-cpp > results.json
+       xdg-open results.json
+     #+END_SRC
+
+   + Computing platform requirements for a distribution
+
+     #+BEGIN_SRC bash
+       ./build-generator platform-requirements                            \
+         -p 'ubuntu xenial'                                               \
+         PATH-TO-CITK/recipes/distributions/rsb-nightly.distribution
+     #+END_SRC
+
+* Build Generator
+
+** Build Generator -- Overview
+   :PROPERTIES:
+   :CUSTOM_ID: generator-overview
+   :END:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Starting point for users
+
+   + Unified commandline interface for
+
+     + {{{emph(Installing and configuring Jenkins instances)}}}
+
+     + Working with recipes (validation, analysis, reports, …)
+
+     + {{{emph(Generating Jenkins jobs)}}}
+
+     + Generating other build processes (=Makefile=, =DockerFile=)
+
+   + Single (large, 30 MB) binary
+
+     + Reasonably portable across Linux systems
+
+     + Few dependencies (OpenSSL's =libssl= being the annoying one)
+
+   + Source code and binary releases on GitHub: https://github.com/rdtk/generator
+
+** Build Generator -- Process
+   :PROPERTIES:
+   :CUSTOM_ID: generator-process
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/build-generator-process.png :cache yes
+     (*) -right-> "Read distribution recipes"
+     -right-> "Read project recipes"
+     -right-> "Analyze projects"
+     -right-> "Resolve dependencies" as a1
+     partition "Building in Jenkins" {
+       a1 ---> "Apply aspects" as a2
+       a2 ---> "Order build steps, publishers" as a3
+       a3 ---> "Emit Jenkins jobs" as a4
+       a4 ---> "Configure orchestration" as a5
+     }
+     partition "Building without Jenkins" {
+       a1 ---> "Write Makefile" as a6
+       a1 ---> "Write DockerFile" as a7
+     }
+     partition Reports {
+       a1 ---> "Generate report" as a8
+       a1 ---> "Generate data for web catalog" as a9
+     }
+     a5 ---> (*)
+     a6 ---> (*)
+     a7 ---> (*)
+     a8 ---> (*)
+     a9 ---> (*)
+   #+END_SRC
+
+   #+RESULTS[d9dde0c55d3cd5a1654b9aaf97f188f54c11fcb0]:
+   [[file:figures/build-generator-process.png]]
+
+** Build Generator -- Commandline Interface                        :noexport:
+   :PROPERTIES:
+   :CUSTOM_ID: generator-cli
+   :END:
+
+   #+BEGIN_SRC shell :results output :exports results :cache yes
+     demo/build-generator | head -n 1
+     echo -e "\n…\n"
+     demo/build-generator | tail -n 15
+   #+END_SRC
+
+   #+RESULTS[a649c9cd9188b2e13a577d2f6f078efa727b7b06]:
+   #+begin_example
+   Usage: build-generator [GLOBAL-OPTIONS] COMMAND [COMMAND-OPTIONS]
+
+   …
+
+   Supported commands:
+
+     analyze                Analyze project repositories w.r.t. dependencies and meta-data.
+     config                 Describe configuration sources and the current configuration.
+     create-jenkins-user    Create a user account in a Jenkins instance.
+     generate               Generate Jenkins jobs for a given distribution.
+     help                   Print help either for all commands or for a given command.
+     info-aspects           Print information about available aspects.
+     info-variables         Print information about recognized variables.
+     install-jenkins        Install and configure a Jenkins CI server.
+     platform-requirements  Analyze system packages required on a given platform.
+     report                 Generate one or more reports for given distribution(s).
+     validate               Perform basic sanity checks for a given recipe repository.
+     version                Print the version of this program and some components.
+
+   #+end_example
+
+* End of "Generic Approach" Part of the Presentation
+  :PROPERTIES:
+  :CUSTOM_ID:         start-specific-part
+  :REVEAL_BACKGROUND: #204020
+  :END:
+
+  Now we address {{{emph(and discuss)}}} the following more specific
+  aspects:
+
+  1. Bootstrapping the aforementioned tools and processes on a
+     {{{emph(user's)}}} computer
+
+  2. Automatically configuring Docker-based Jenkins slaves for
+     continuous integration
+
+* Bootstrapping
+
+** Bootstrapping -- Motivation
+   :PROPERTIES:
+   :CUSTOM_ID: bootstrapping-motivation
+   :END:
+
+   Scenario:
+
+   + User wants to {{{emph(try out)}}}, {{{emph(reproduce)}}},
+     {{{emph(develop)}}} or {{{emph(learn)}}} a continuous integration
+     setup on their own machine
+
+   + Running Linux, Docker installed
+
+   + Doesn't want to modify or pollute system with lots of software
+
+   + Doesn't want to manually apply a long list of setup steps
+
+   #+ATTR_REVEAL: :frag appear :frag_idx 2
+   The requirements are thus:
+
+   #+ATTR_REVEAL: :frag (appear) :frag_idx (2 2)
+   + Initial download and installation should be minimal
+
+   + From there, maximum automation, minimal number of manual steps
+
+** Bootstrapping -- Process
+   :PROPERTIES:
+   :CUSTOM_ID: bootstrapping-process
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/bootstrapping.png :cache yes
+     skinparam activity {
+       BackgroundColor<< manual >> #c0a0a0
+       BackgroundColor<< future >> #a0c0a0
+     }
+
+     (*) -down-> ===B1===
+
+     ===B1=== -down-> "Download Build Generator //(30 s)//" << manual >>
+     -right-> "build-generator install-jenkins" as a2 << manual >>
+     partition "Install Jenkins //(120 s)//" {
+       a2 -right-> "Download jenkins.war" as a3
+       a3 -right-> "Download required Jenkins plugins" as a4
+       a4 -right-> "Install Jenkins configuratione" as a5
+       a5 -right-> "Create Jenkins user account" as a6
+     }
+     a6 --> ===B3===
+
+     ===B1=== -down-> "Clone recipes //(30 s)//" << future >>
+     --> ===B3===
+
+     partition "Bring up Jenkins //(30 s)//" {
+       ===B3=== --> "Start Jenkins" as a7 << future >>
+       a7 -right-> "Create self-signed certificate" as a8
+     }
+
+     partition "Generate Jobs //(90 s)//" {
+       ' a8 -down-> if "" then
+       '  -down-> "build-generator platform-requirements" as a9 << manual >>
+       ' else
+       '  -down-> ===B4===
+       ' endif
+       a8 -down-> "build-generator generate" as a10 << future >>
+     }
+     ' a9 --> ===B4===
+     a10 -down-> ===B4===
+
+     partition "Build Distribution" {
+       ===B4=== -down-> "Run generated jobs" as a11
+     }
+
+     -down-> (*)
+   #+END_SRC
+
+   #+RESULTS[260caaea778ccddb4bd5e6abaa61b1e642605425]:
+   [[file:figures/bootstrapping.png]]
+
+   #+BEGIN_NOTES
+   + Rot :: manuelle Schritte
+   + Grün :: manuelle Schritte, die automatisiert werden könnten
+
+   wer macht was? was automatisch/manuell
+   Wie lange dauern die phase
+   #+END_NOTES
+
+** Bootstrapping -- Demo
+   :PROPERTIES:
+   :CUSTOM_ID:         bootstrapping-demo
+   :REVEAL_BACKGROUND: #e8e8ff
+   :END:
+
+   + Get generator binary from https://github.com/rdtk/generator/releases
+
+   + Install Jenkins
+
+     #+BEGIN_SRC bash
+       ./build-generator install-jenkins        \
+         --profile local-docker                 \
+         -u jan -p test -e a@b.c                \
+         install-test
+       # Takes between 60 and 300 seconds
+
+       cd install-test
+       ./start_jenkins
+     #+END_SRC
+
+   + Clone recipe repository
+
+     #+BEGIN_SRC bash
+       git clone -b wip-docker https://opensource.cit-ec.de/git/citk
+     #+END_SRC
+
+   + Generate Distribution Jobs
+
+     #+BEGIN_SRC
+       ./build-generator generate                                       \
+         -u jan -p test                                                 \
+         -D 'view.create?=true' -D view.name='Demo 1'                   \
+         citk/distributions/build-generator-nightly.distribution
+     #+END_SRC
+
+   + Result: https://localhost:8080/view/Demo%201/
+
+* Docker-based Jenkins Slaves
+
+** Docker Slaves -- Motivation
+   :PROPERTIES:
+   :CUSTOM_ID: docker-slaves-motivation
+   :END:
+
+   #+ATTR_REVEAL: :frag appear
+   Build generator supports different targets/modes:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Jenkins jobs for continuous integration, deployment, mixture of
+     both
+
+   + Makefile, DockerFile
+
+   + {{{emph(Jenkins jobs using Docker slaves)}}}
+
+   #+ATTR_REVEAL: :frag appear
+   Advantages of Docker slaves:
+
+   #+ATTR_REVEAL: :frag (appear)
+   + Full isolation between jobs and from host system (good for CI,
+     reproducibility)
+
+   + Install dependencies in container -- no side-effects on host
+     system
+
+   + Build, test on different Linux platforms independent of host
+
+   + {{{color(#606060,Share runnable systems as Docker images)}}}
+
+** Docker Slaves -- Process
+   :PROPERTIES:
+   :CUSTOM_ID: docker-slaves-ci-process
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/docker-process-ci-initial-setup.png :cache yes
+     partition "Build Generator" {
+       (*) --> "Read recipes"
+       "Read recipes" -right-> "Analyze dependencies"
+       "Analyze dependencies" -right-> "Generate Jenkins jobs" as a1
+     }
+     partition "Jenkins" {
+       a1 --> "Start Orchestration Job"
+       --> "Enable and start root jobs" as a2
+       partition "Job" {
+         a2 --> "Start container" as a3
+         -right-> "Install dependencies"
+         -right-> "Copy upstream artifacts"
+         -right-> "Execute build steps"
+         -right-> "Archive artifacts, reports"
+         -right-> "Trigger downstream jobs"
+       }
+     }
+   #+END_SRC
+
+   #+RESULTS[7d9f884f4caef5fc8b73013321bce78d6353b120]:
+   [[file:figures/docker-process-ci-initial-setup.png]]
+
+   #+BEGIN_SRC plantuml :file figures/docker-process-ci-scm-trigger.png :cache yes
+     partition "Jenkins" {
+       (*) --> "SCM change detected" as a1
+       partition "Job" {
+         a1 --> "Start container"
+         -right-> "Install dependencies"
+         -right-> "Copy upstream artifacts"
+         -right-> "Execute build steps"
+         -right-> "Archive artifacts, reports"
+         -right-> "Trigger downstream jobs"
+       }
+     }
+   #+END_SRC
+
+   #+RESULTS[e08e8044896866bda0547613f2f95bb7311fe791]:
+   [[file:figures/docker-process-ci-scm-trigger.png]]
+
+
+** Docker Slaves -- Demo
+   :PROPERTIES:
+   :CUSTOM_ID:         docker-slaves-demo
+   :REVEAL_BACKGROUND: #e8e8ff
+   :END:
+
+   + Generate Distribution Jobs
+
+     #+BEGIN_SRC bash
+       ./build-generator generate                                 \
+         -u jan -p test                                           \
+         -D 'view.create?=true' -D view.name='Demo 2'             \
+         -m ci-docker                                             \
+         citk/distributions/cogimon-core-nightly.distribution
+     #+END_SRC
+
+   + Result: https://localhost:8080/view/Demo%202/
+
+* Thank You for Your Attention!
+  :PROPERTIES:
+  :CUSTOM_ID:         thank-you
+  :REVEAL_BACKGROUND: #204020
+  :END:
+
+  {{{emph(Summary)}}}
+
+  + General approach
+
+     + System description model and language
+
+     + Dependency and metadata analysis
+
+  + Specific aspects
+
+    + Build generator tool
+
+    + Bootstrapping
+
+    + Docker slave configuration
+
+    + Research software catalog
+
+  {{{emph(Questions?)}}}
+
+* Backup Slides
+
+** Catalog -- Demo
+   :PROPERTIES:
+   :CUSTOM_ID:         catalog-demo
+   :REVEAL_BACKGROUND: #202040
+   :END:
+
+   https://citkat-citec.bob.ci.cit-ec.net/browse/distribution/
+
+** Docker Slaves -- Monolithic Process
+   :PROPERTIES:
+   :CUSTOM_ID: docker-slaves-monolithic-process
+   :END:
+
+   #+BEGIN_SRC plantuml :file figures/docker-process-monolithic.png :cache yes
+     partition "Build Generator" {
+       (*) -left-> "Read recipes"
+       "Read recipes" -left-> "Analyze dependencies"
+       "Analyze dependencies" -left-> "Generate Jenkins jobs" as a1
+     }
+     partition "Jenkins" {
+       a1 -down-> if "Docker Image up-to-date?" then
+                    -down-> "Start Distribution Build"
+                  else
+                    -> "Start Docker container"
+                  endif
+       "Start Docker container" --> "Prepare Docker container"
+       "Prepare Docker container" --> "Save Docker container" as a2
+       a2 -down-> "Start Distribution Build"
+       "Start Distribution Build" -right-> "Save Docker container" as a3
+       a3 -right-> (*)
+     }
+   #+END_SRC
+
+   #+RESULTS[9682753a3efb40a518282aaabee0dbfade2aee8b]:
+   [[file:figures/docker-process-monolithic.png]]

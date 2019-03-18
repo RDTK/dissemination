@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Research Development Toolkit</title>
+<meta name="author" content="Authors"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="./reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="./reveal.js/css/theme/simple.css" id="theme"/>
+
+<link rel="stylesheet" href="style.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = './reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1 class="title">Research Development Toolkit</h1><h2 class="author">Authors</h2>
+</section>
+
+<section>
+<section id="slide-orgec2d272">
+<h2 id="orgec2d272">Introduction</h2>
+<div class="outline-text-2" id="text-orgec2d272">
+</div>
+</section>
+<section id="slide-introduction-heterogeneity">
+<h3 id="introduction-heterogeneity"><a id="org987d44b"></a>Motivation &#x2013; Heterogeneity</h3>
+<p>
+<span style="color: #1b91ff; font-weight: bold">Software systems</span> in a scientific context:
+</p>
+
+<ul>
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Large</span>: Often tens to hundreds of software components</li>
+
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Heterogeneous</span>: Hosting solutions, version control
+systems, programming languages, build systems, licenses,
+maintenance models, 3rd party/1st party, legacy components</li>
+
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Complex</span>: Dependency structure, versions, variability</li>
+
+</ul>
+
+<p class="fragment appear">
+<span style="color: #1b91ff; font-weight: bold">Researchers</span> develop software in many different ways:
+</p>
+
+<ul>
+<li class="fragment appear">Everyone tries to use best suited technologies and process</li>
+
+<li class="fragment appear">Different non-functional requirements (documentation,
+maintainability, maturity, level of professionalism in
+development process)</li>
+
+<li class="fragment appear">Teams set up their own CI, sometimes repository hosting &#x2013;
+centralized IT services focus on other aspects</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>CSRA: Smart Homer, distributed</li>
+
+<li>Cogimon: Robot Control, real-time</li>
+
+</ul>
+
+</aside>
+
+</section>
+<section id="slide-org07b14ef">
+<h3 id="org07b14ef">Introduction &#x2013; Example System</h3>
+
+<div class="figure">
+<p><img src="figures/cogimon-core-ros-nightly.png" alt="cogimon-core-ros-nightly.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-introduction-related-work">
+<h3 id="introduction-related-work"><a id="orge16579f"></a>Introduction &#x2013; Related Work</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">lock-in</th>
+<th scope="col" class="org-left">repro</th>
+<th scope="col" class="org-left">multi</th>
+<th scope="col" class="org-left">3rd party</th>
+<th scope="col" class="org-left">UX</th>
+<th scope="col" class="org-left">knowledge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">TFS</td>
+<td class="org-left">?</td>
+<td class="org-left">-</td>
+<td class="org-left">?</td>
+<td class="org-left">?</td>
+<td class="org-left">+</td>
+<td class="org-left">server(?)</td>
+</tr>
+
+<tr>
+<td class="org-left">Azure DevOPS</td>
+<td class="org-left">?</td>
+<td class="org-left">-</td>
+<td class="org-left">?</td>
+<td class="org-left">-(?)</td>
+<td class="org-left">+</td>
+<td class="org-left">repository</td>
+</tr>
+
+<tr>
+<td class="org-left">GitHub + Travis</td>
+<td class="org-left">-</td>
+<td class="org-left">-</td>
+<td class="org-left">-</td>
+<td class="org-left">-</td>
+<td class="org-left">~</td>
+<td class="org-left">repository</td>
+</tr>
+
+<tr>
+<td class="org-left">Jenkins</td>
+<td class="org-left">~</td>
+<td class="org-left">+</td>
+<td class="org-left">~</td>
+<td class="org-left">+</td>
+<td class="org-left">~</td>
+<td class="org-left">server or project repo</td>
+</tr>
+
+<tr>
+<td class="org-left">ROS ecosystem</td>
+<td class="org-left">-</td>
+<td class="org-left">-</td>
+<td class="org-left">+</td>
+<td class="org-left">+</td>
+<td class="org-left">~</td>
+<td class="org-left">?</td>
+</tr>
+
+<tr>
+<td class="org-left">YCM</td>
+<td class="org-left">-</td>
+<td class="org-left">?</td>
+<td class="org-left">?</td>
+<td class="org-left">?</td>
+<td class="org-left">~</td>
+<td class="org-left">project repo</td>
+</tr>
+</tbody>
+</table>
+
+<aside class="notes">
+<ul>
+<li>es geht um Achsen und Spektrum, nicht konkrete Bewertung</li>
+
+<li>andere Achsen wären auch möglich gewesen, z.B. Homebrew</li>
+
+</ul>
+
+</aside>
+
+</section>
+<section id="slide-motivation-goal">
+<h3 id="motivation-goal"><a id="org2e5de05"></a>Introduction &#x2013; Goal</h3>
+<p>
+Bringing together multiple usually disparate aspects:
+</p>
+
+<ul>
+<li>Organizational, social and historical aspects of projects</li>
+
+<li>Versioning (across version control systems and repository hosting solutions)</li>
+
+<li>Build system-level dependencies (across build systems and programming languages)</li>
+
+</ul>
+
+<p>
+to facilitate
+</p>
+
+<ul>
+<li>Construction and testing</li>
+
+<li>Deployment</li>
+
+<li>(Re-)use and reproducibility</li>
+
+<li>Documentation</li>
+
+<li>Dissemination</li>
+
+</ul>
+
+<p>
+of large, heterogeneous, complex research software system
+</p>
+
+</section>
+<section id="slide-introduction-agenda">
+<h3 id="introduction-agenda"><a id="orgd30f75c"></a>Agenda for this Presentation</h3>
+<ul>
+<li>General approach
+
+<ul>
+<li data-fragment-index="2" class="fragment highlight-blue">System description model and language</li>
+
+<li data-fragment-index="2" class="fragment highlight-blue">Dependency and metadata analysis</li>
+
+<li>Repository server, collaboration process</li>
+
+<li>Operations</li>
+
+<li>Reproducibility of software, experiments and publications</li>
+
+<li>Best practices</li>
+
+</ul></li>
+
+<li>Specific aspects
+
+<ul>
+<li data-fragment-index="2" class="fragment highlight-blue">Build generator tool</li>
+
+<li data-fragment-index="2" class="fragment highlight-blue">Bootstrapping</li>
+
+<li data-fragment-index="2" class="fragment highlight-blue">Docker slave configuration</li>
+
+<li>Research software catalog</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org61dad54">
+<h2 id="org61dad54">Description Language</h2>
+<div class="outline-text-2" id="text-org61dad54">
+</div>
+</section>
+<section id="slide-language-concepts">
+<h3 id="language-concepts"><a id="org5246272"></a>Description Language &#x2013; Concepts</h3>
+<ul>
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Project</span> in this context:
+
+<ul>
+<li>Logical, organizational concept</li>
+
+<li>Has a history, has versions, one or more manifestations (Example: RSB middleware used to live in a Redmine, now GitHub)</li>
+
+<li>Cannot be built or executed</li>
+
+</ul></li>
+
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Project Version</span> in this context:
+
+<ul>
+<li>Concrete, consists of source code artifacts</li>
+
+<li>Often a particular revision in a particular repository</li>
+
+<li>Can be built, producing one (or more) <span style="color: #1b91ff; font-weight: bold">components</span></li>
+
+</ul></li>
+
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Distribution</span> in this context:
+
+<ul>
+<li>Collection of <span style="color: #1b91ff; font-weight: bold">project versions</span> that can be built, deployed and used together</li>
+
+<li>Can be built, producing a <span style="color: #1b91ff; font-weight: bold">system</span> consisting of <span style="color: #1b91ff; font-weight: bold">components</span></li>
+
+</ul></li>
+
+</ul>
+
+</section>
+<section id="slide-language-domain">
+<h3 id="language-domain"><a id="org91af038"></a>Domain: Research Software Systems</h3>
+<p>
+Core domain concepts:
+</p>
+
+<ul>
+<li><span style="color: #1b91ff; font-weight: bold">Project</span>, <span style="color: #1b91ff; font-weight: bold">Project Version</span>, <span style="color: #1b91ff; font-weight: bold">Distribution</span></li>
+
+<li>System, Component</li>
+
+</ul>
+
+<p data-fragment-index="2" class="fragment appear">
+Other important (domain) concepts:
+</p>
+
+<ul>
+<li class="fragment appear">Dependency</li>
+
+<li class="fragment appear">Required, provided feature</li>
+
+<li class="fragment appear">Target platform</li>
+
+<li class="fragment appear">Variability</li>
+
+<li class="fragment appear">Composition</li>
+
+<li class="fragment appear">Generalization</li>
+
+<li class="fragment appear">Build step description</li>
+
+<li class="fragment appear">Metadata</li>
+
+<li class="fragment appear">Person, Role</li>
+
+</ul>
+
+</section>
+<section id="slide-language-metamodel">
+<h3 id="language-metamodel"><a id="org4026438"></a>Simplified Meta Model</h3>
+
+<div class="figure">
+<p><img src="figures/meta-model.png" alt="meta-model.png" />
+</p>
+</div>
+
+<aside class="notes">
+<p>
+bringt aspekte zusammen: repository, versionen, asbhängigkeiten auf build-system ebene
+beispiele für repositories
+beispiele für features
+</p>
+
+</aside>
+
+
+</section>
+<section id="slide-syntax">
+<h3 id="syntax"><a id="org821be6b"></a>Recipes &#x2013; Concrete Syntax</h3>
+<ul>
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Recipes</span> describe instances of metamodel concepts:
+
+<ul>
+<li>Project recipes: Projects and project versions</li>
+
+<li>Distribition recipes: Distributions</li>
+
+<li>Template recipes: Templates and aspects</li>
+
+<li>Person recipes: People</li>
+
+</ul></li>
+
+<li class="fragment appear"><p>
+Recipe syntax is based on <a href="https://yaml.org">YAML</a>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-yaml"><span class="linenr">1: </span><span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Comments! Take that JSON!</span>
+<span class="linenr">2: </span><span style="color: #5699AF;">scalar</span>: |
+<span class="linenr">3: </span>  Long text with <span style="color: #d08928;">""</span> and <span style="color: #d08928;">''</span> and even \
+<span class="linenr">4: </span><span style="color: #5699AF;">list</span>:
+<span class="linenr">5: </span>  - first
+<span class="linenr">6: </span>  - second
+<span class="linenr">7: </span><span style="color: #5699AF;">mapping</span>:
+<span class="linenr">8: </span>  <span style="color: #5699AF;">key</span>: value
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+
+<ul>
+<li><p>
+Each recipe kind has a schema which, among other things,
+organizes the recipe into sections:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-yaml"><span style="color: #5699AF;">catalog</span>:
+  <span style="color: #5699AF;">&#8230;</span>
+<span style="color: #5699AF;">variables</span>:
+  <span style="color: #5699AF;">&#8230;</span>
+<span style="color: #5699AF;">include</span>:
+  <span style="color: #5699AF;">&#8230;</span>
+<span style="color: #5699AF;">versions</span>:
+  &#8230;
+</pre>
+</div></li>
+
+</ul>
+
+<ul>
+<li class="fragment appear">Variable substitution syntax
+
+<ul>
+<li>Scalar reference: <code>${NAME|DEFAULT}</code></li>
+
+<li>Splicing reference: <code>@{NAME|DEFAULT}</code></li>
+
+<li>Delegation: <code>${next-value|DEFAULT}</code></li>
+
+</ul></li>
+
+</ul>
+
+</section>
+<section id="slide-recipes">
+<h3 id="recipes"><a id="orga06f913"></a>Recipes &#x2013; Example</h3>
+<p>
+<b>Project Recipe</b> <code>rsb-cpp.project</code>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-yaml"><span class="linenr"> 1: </span><span style="color: #5699AF;">templates</span>:                        <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Generalization</span>
+<span class="linenr"> 2: </span>- github
+<span class="linenr"> 3: </span>- cmake-cpp
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span><span style="color: #5699AF;">variables</span>:
+<span class="linenr"> 6: </span><span style="color: #5699AF;">recipe.maintainer</span>:                <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">People</span>
+<span class="linenr"> 7: </span>- Jan Moringen <a href="mailto:jmoringe%40techfak.uni-bielefeld.de">&lt;jmoringe@techfak.uni-bielefeld.de&gt;</a>
+<span class="linenr"> 8: </span><span style="color: #5699AF;">access</span>: public                    <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Metadata</span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span><span style="color: #5699AF;">github.user</span>: open-rsx             <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Repository</span>
+<span class="linenr">11: </span><span style="color: #5699AF;">github.project</span>: rsb-cpp
+<span class="linenr">12: </span>
+<span class="linenr">13: </span><span style="color: #5699AF;">branches</span>: [ master ]              <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Minimal specification of versions</span>
+</pre>
+</div>
+
+<p data-fragment-index="2" class="fragment appear">
+<b>Distribution Recipe</b> <code>my-distribution.distribution</code>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear" data-fragment-index="2"><span class="linenr"> 1: </span><span style="color: #5699AF;">include</span>:
+<span class="linenr"> 2: </span>- other-distribution              <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Composition</span>
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span><span style="color: #5699AF;">versions</span>:
+<span class="linenr"> 5: </span>- <span style="color: #5699AF;">name</span>: rsb-cpp
+<span class="linenr"> 6: </span>  <span style="color: #5699AF;">versions</span>:
+<span class="linenr"> 7: </span>  - <span style="color: #5699AF;">version</span>: master
+<span class="linenr"> 8: </span>  - <span style="color: #5699AF;">parameters</span>:                   <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Variability</span>
+<span class="linenr"> 9: </span>    <span style="color: #5699AF;">cmake.options</span>:
+<span class="linenr">10: </span>    - <span style="color: #d08928;">'@{next-value|[]}'</span>
+<span class="linenr">11: </span>    - CMAKE_BUILD_TYPE=Debug
+<span class="linenr">12: </span>- rsb-python@master
+</pre>
+</div>
+
+</section>
+<section id="slide-recipes-repository">
+<h3 id="recipes-repository"><a id="org4c162df"></a>Recipes &#x2013; Repository</h3>
+<p>
+One aspect of the <span style="color: #1b91ff; font-weight: bold">Cognitive Interaction Toolkit</span> is a
+shared repository of recipes describing software projects and
+software systems:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Recipes</td>
+<td class="org-right">1580</td>
+</tr>
+
+<tr>
+<td class="org-left">├─Project Recipes</td>
+<td class="org-right">1380</td>
+</tr>
+
+<tr>
+<td class="org-left">└─Distribution Recipes</td>
+<td class="org-right">200</td>
+</tr>
+
+<tr>
+<td class="org-left">Commits</td>
+<td class="org-right">9000</td>
+</tr>
+
+<tr>
+<td class="org-left">Contributors</td>
+<td class="org-right">100</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section id="slide-demo-recipes" data-background="#e8e8ff">
+<h3 id="demo-recipes"><a id="org9d6c165"></a>Recipes &#x2013; Demo</h3>
+
+</section>
+</section>
+<section>
+<section id="slide-org932cffb">
+<h2 id="org932cffb">Dependency and Metadata Analysis</h2>
+<div class="outline-text-2" id="text-org932cffb">
+</div>
+</section>
+<section id="slide-analysis-motivation">
+<h3 id="analysis-motivation"><a id="org54e9990"></a>Automatic Analysis &#x2013; Motivation</h3>
+<p>
+Concise recipes are enabled by <span style="color: #1b91ff; font-weight: bold">automatic analysis</span>.
+</p>
+
+<p class="fragment appear">
+By inspecting a particular revision in the repository associated to
+a project version, <span style="color: #1b91ff; font-weight: bold">automatically</span> determine the
+following information (so recipe authors do not have to explicitly
+declare it):
+</p>
+
+<dl>
+<dt class="fragment appear">Dependencies</dt><dd class="fragment appear"><ul>
+<li>Provided features (ideally with versions and scope)</li>
+
+<li>Required features (ideally with versions and scope)</li>
+
+</ul></dd>
+
+<dt class="fragment appear">Metadata</dt><dd class="fragment appear"><ul>
+<li>People (authors, maintainers, committers)</li>
+
+<li>License(s)</li>
+
+<li>Description</li>
+
+<li>Access restrictions</li>
+
+</ul></dd>
+
+<dt class="fragment appear">Build Steps</dt><dd class="fragment appear"><ul>
+<li>Names of modules</li>
+
+<li>Produced artifacts</li>
+
+</ul></dd>
+
+</dl>
+
+</section>
+<section id="slide-dependency-model">
+<h3 id="dependency-model"><a id="org8c2a432"></a>Automatic Analysis &#x2013; Dependency Model</h3>
+<ul>
+<li>Feature: triple (<span style="color: #a04040">nature</span>, <span style="color: #40a040">target</span>[, <span style="color: #4040a0">version</span>])</li>
+<li>Project versions provide features (usually versioned)</li>
+<li>Project versions require features (versioned or unversioned)</li>
+<li>System packages provide features</li>
+
+</ul>
+
+
+<div class="figure">
+<p><img src="figures/requires-provides.png" alt="requires-provides.png" />
+</p>
+</div>
+
+</section>
+<section id="slide-dependency-analysis">
+<h3 id="dependency-analysis"><a id="org42b9f4e"></a>Automatic Analysis &#x2013; Examples</h3>
+<p data-fragment-index="1" class="fragment appear">
+<b>CMake</b>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear" data-fragment-index="1"><span class="linenr">1: </span><span style="color: #b77fdb; font-weight: bold;">project</span>(myproject VERSION 1.2       <span style="color: #808080; font-style: italic;"># provides cmake:myproject:1.2</span>
+<span class="linenr">2: </span>                  LANGUAGES C C++)  <span style="color: #808080; font-style: italic;"># metadata</span>
+<span class="linenr">3: </span>
+<span class="linenr">4: </span><span style="color: #b77fdb; font-weight: bold;">find_package</span>(alibrary 1.0 REQUIRED) <span style="color: #808080; font-style: italic;"># requires cmake:alibrary:1.0</span>
+<span class="linenr">5: </span>
+<span class="linenr">6: </span><span style="color: #b77fdb; font-weight: bold;">pkg_search_modules</span>(another_library) <span style="color: #808080; font-style: italic;"># requires pkg-config:another_library</span>
+</pre>
+</div>
+
+<p data-fragment-index="2" class="fragment appear">
+<b>Maven</b>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear" data-fragment-index="2"><span class="linenr"> 1: </span>&lt;<span style="color: #b77fdb; font-weight: bold;">project</span>&gt;
+<span class="linenr"> 2: </span>  &#8230;
+<span class="linenr"> 3: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">licenses</span>&gt;&#8230;&lt;/<span style="color: #b77fdb; font-weight: bold;">licenses</span>&gt;         <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">metadata </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr"> 4: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">organization</span>&gt;&#8230;&lt;/<span style="color: #b77fdb; font-weight: bold;">organization</span>&gt;
+<span class="linenr"> 5: </span>  &#8230;
+<span class="linenr"> 6: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">groupId</span>&gt;open-rsx&lt;/<span style="color: #b77fdb; font-weight: bold;">groupId</span>&gt;    <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">provides maven:open-rsx/rsb:0.18 </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr"> 7: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">artifactId</span>&gt;rsb&lt;/<span style="color: #b77fdb; font-weight: bold;">artifactId</span>&gt;
+<span class="linenr"> 8: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;0.18&lt;/<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;
+<span class="linenr"> 9: </span>  &#8230;
+<span class="linenr">10: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">dependencies</span>&gt;
+<span class="linenr">11: </span>    &lt;<span style="color: #b77fdb; font-weight: bold;">dependency</span>&gt;                 <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">requires maven:junit/junit:1.0 </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr">12: </span>      &lt;<span style="color: #b77fdb; font-weight: bold;">groupId</span>&gt;junit&lt;/<span style="color: #b77fdb; font-weight: bold;">groupId</span>&gt;
+<span class="linenr">13: </span>      &lt;<span style="color: #b77fdb; font-weight: bold;">artifactId</span>&gt;junit&lt;/<span style="color: #b77fdb; font-weight: bold;">artifactId</span>&gt;
+<span class="linenr">14: </span>      &lt;<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;1.0&lt;/<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;
+<span class="linenr">15: </span>    &lt;/<span style="color: #b77fdb; font-weight: bold;">dependency</span>&gt;
+<span class="linenr">16: </span>  &lt;/<span style="color: #b77fdb; font-weight: bold;">dependencies</span>&gt;
+<span class="linenr">17: </span>  &#8230;
+<span class="linenr">18: </span>&lt;/<span style="color: #b77fdb; font-weight: bold;">project</span>&gt;
+</pre>
+</div>
+
+</section>
+<section >
+
+<p>
+<b>Python Setuptools</b>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span class="linenr"> 1: </span>setup(name        = <span style="color: #d08928;">'rsb'</span>,             <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">provides setuptools:rsb:0.18</span>
+<span class="linenr"> 2: </span>      version     = <span style="color: #d08928;">'0.18'</span>,
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>      description = <span style="color: #d08928;">"Event-driven &#8230;"</span>,  <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">metadata</span>
+<span class="linenr"> 5: </span>      author      = <span style="color: #d08928;">'Johannes Wienke'</span>,
+<span class="linenr"> 6: </span>      <span style="color: #60aa00;">license</span>     = <span style="color: #d08928;">'LGPLv3+'</span>,
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>      install_requires = [             <span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">requires setuptools:protobuf:2.8</span>
+<span class="linenr"> 9: </span>          <span style="color: #d08928;">'protobuf&gt;=2.8'</span>
+<span class="linenr">10: </span>      ]
+<span class="linenr">11: </span>      &#8230;
+<span class="linenr">12: </span>      )
+</pre>
+</div>
+
+<p data-fragment-index="2" class="fragment appear">
+<b>ROS Package</b>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear" data-fragment-index="2"><span class="linenr"> 1: </span>&lt;<span style="color: #b77fdb; font-weight: bold;">package</span>&gt;
+<span class="linenr"> 2: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">name</span>&gt;robo_nav&lt;/<span style="color: #b77fdb; font-weight: bold;">name</span>&gt;                <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">provides ros-package:robo_nav:0.1 </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr"> 3: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;0.1&lt;/<span style="color: #b77fdb; font-weight: bold;">version</span>&gt;
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">description</span>&gt;&#8230;&lt;/<span style="color: #b77fdb; font-weight: bold;">description</span>&gt;         <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">metadata </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr"> 6: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">maintainer</span> <span style="color: #5699AF;">email</span>=<span style="color: #d08928;">"&#8230;"</span>&gt;&#8230;&lt;/<span style="color: #b77fdb; font-weight: bold;">maintainer</span>&gt;
+<span class="linenr"> 7: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">author</span> <span style="color: #5699AF;">email</span>=<span style="color: #d08928;">"&#8230;"</span>&gt;&#8230;&lt;/<span style="color: #b77fdb; font-weight: bold;">author</span>&gt;
+<span class="linenr"> 8: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">license</span>&gt;BSD&lt;/<span style="color: #b77fdb; font-weight: bold;">license</span>&gt;
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>  &lt;<span style="color: #b77fdb; font-weight: bold;">build_depend</span>&gt;                       <span style="color: #808080; font-style: italic;">&lt;!-- </span><span style="color: #808080; font-style: italic;">requires ros-package:path_planner </span><span style="color: #808080; font-style: italic;">--&gt;</span>
+<span class="linenr">11: </span>    path_planner
+<span class="linenr">12: </span>  &lt;/<span style="color: #b77fdb; font-weight: bold;">build_depend</span>&gt;
+<span class="linenr">13: </span>&lt;/<span style="color: #b77fdb; font-weight: bold;">package</span>&gt;
+</pre>
+</div>
+
+</section>
+<section id="slide-analysis-limitations">
+<h3 id="analysis-limitations"><a id="org29119e6"></a>Automatic Analysis &#x2013; Limitations and Strategies</h3>
+<ul>
+<li class="fragment appear">Accuracy of automatic analysis results depends on project type:
+
+<ul>
+<li>Complete and exact (Maven, ROS packages, pkg-config)</li>
+
+<li>Potentially incomplete and Heuristic (CMake, Python setuptools)</li>
+
+</ul></li>
+
+<li class="fragment appear"><p>
+Thus: recipe authors can help out:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-yaml"><span class="linenr">1: </span><span style="color: #5699AF;">extra-requires</span>:
+<span class="linenr">2: </span>  - <span style="color: #d08928;">'@{next-value|[]}'</span>
+<span class="linenr">3: </span>  - <span style="color: #5699AF;">nature</span>:
+<span class="linenr">4: </span>    <span style="color: #5699AF;">target</span>:
+<span class="linenr">5: </span>    <span style="color: #5699AF;">version</span>:
+</pre>
+</div>
+
+<p>
+<code>extra-requires</code>, <code>extra-provides</code> take part in delegation and
+are merged with results of automatic analysis
+</p></li>
+
+<li class="fragment appear">Also an extension point: analysis strategies for new project
+natures can be added</li>
+
+<li class="fragment appear">Future work (proof-of-concept stage): limited interpretation for
+complicated cases for CMake and Python setuptools</li>
+
+</ul>
+
+</section>
+<section id="slide-analysis-platform-requirements">
+<h3 id="analysis-platform-requirements"><a id="orga4e32c1"></a>Platform Requirements</h3>
+
+<div class="figure">
+<p><img src="figures/platform-hierarchy.png" alt="platform-hierarchy.png" align="right" />
+</p>
+</div>
+
+<p>
+<div style="width: 70%">
+</p>
+<ul>
+<li><p>
+Declaration
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-yaml"><span class="linenr"> 1: </span><span style="color: #5699AF;">variables</span>:
+<span class="linenr"> 2: </span>  <span style="color: #5699AF;">platform-requires</span>:
+<span class="linenr"> 3: </span>    <span style="color: #5699AF;">ubuntu</span>:
+<span class="linenr"> 4: </span>      <span style="color: #5699AF;">packages</span>:
+<span class="linenr"> 5: </span>      - <span style="color: #d08928;">'@{next-value}'</span>
+<span class="linenr"> 6: </span>      - gcc
+<span class="linenr"> 7: </span>      <span style="color: #5699AF;">bionic</span>:
+<span class="linenr"> 8: </span><span >        </span><span style="color: #5699AF;">packages</span>:
+<span class="linenr"> 9: </span><span >        </span>- <span style="color: #d08928;">'@{next-value}'</span>
+<span class="linenr">10: </span><span >        </span>- clang
+</pre>
+</div></li>
+
+<li>Merged according to platform hierarchy</li>
+
+<li>Can be declared in
+
+<ul>
+<li>Project recipes</li>
+
+<li><span style="color: #1b91ff; font-weight: bold">Template reciples</span>. For example, all Maven projects
+need a JDK</li>
+
+</ul></li>
+
+<li>Future improvement: further automation based on required features</li>
+
+</ul>
+<p>
+</div>
+</p>
+
+</section>
+<section id="slide-analysis-catalog">
+<h3 id="analysis-catalog"><a id="orgf820d21"></a>Catalog</h3>
+<p>
+Automatic analysis and metadata is also useful for humans:
+</p>
+
+
+<div class="figure">
+<p><img src="figures/catalog-screenshot-project.png" alt="catalog-screenshot-project.png" width="70%" />
+</p>
+</div>
+
+</section>
+<section >
+
+
+<div class="figure">
+<p><img src="figures/catalog-screenshot-distribution.png" alt="catalog-screenshot-distribution.png" width="70%" />
+</p>
+</div>
+
+</section>
+<section id="slide-analysis-demo" data-background="#e8e8ff">
+<h3 id="analysis-demo"><a id="orgc878ebb"></a>Analysis &#x2013; Demo</h3>
+<ul>
+<li><p>
+Analyzing a repository
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">./build-generator analyze https://github.com/open-rsx/rsb-cpp &gt; results.json
+xdg-open results.json
+</pre>
+</div></li>
+
+<li><p>
+Computing platform requirements for a distribution
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">./build-generator platform-requirements                            <span style="color: #d08928;">\</span>
+  -p <span style="color: #d08928;">'ubuntu xenial'</span>                                               <span style="color: #d08928;">\</span>
+  PATH-TO-CITK/recipes/distributions/rsb-nightly.distribution
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org4e66acf">
+<h2 id="org4e66acf">Build Generator</h2>
+<div class="outline-text-2" id="text-org4e66acf">
+</div>
+</section>
+<section id="slide-generator-overview">
+<h3 id="generator-overview"><a id="orga2aa082"></a>Build Generator &#x2013; Overview</h3>
+<ul>
+<li class="fragment appear">Starting point for users</li>
+
+<li class="fragment appear">Unified commandline interface for
+
+<ul>
+<li><span style="color: #1b91ff; font-weight: bold">Installing and configuring Jenkins instances</span></li>
+
+<li>Working with recipes (validation, analysis, reports, …)</li>
+
+<li><span style="color: #1b91ff; font-weight: bold">Generating Jenkins jobs</span></li>
+
+<li>Generating other build processes (<code>Makefile</code>, <code>DockerFile</code>)</li>
+
+</ul></li>
+
+<li class="fragment appear">Single (large, 30 MB) binary
+
+<ul>
+<li>Reasonably portable across Linux systems</li>
+
+<li>Few dependencies (OpenSSL's <code>libssl</code> being the annoying one)</li>
+
+</ul></li>
+
+<li class="fragment appear">Source code and binary releases on GitHub: <a href="https://github.com/rdtk/generator">https://github.com/rdtk/generator</a></li>
+
+</ul>
+
+</section>
+<section id="slide-generator-process">
+<h3 id="generator-process"><a id="org54fbc75"></a>Build Generator &#x2013; Process</h3>
+
+<div class="figure">
+<p><img src="figures/build-generator-process.png" alt="build-generator-process.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-start-specific-part" data-background="#204020">
+<h2 id="start-specific-part"><a id="org9334134"></a>End of "Generic Approach" Part of the Presentation</h2>
+<p>
+Now we address <span style="color: #1b91ff; font-weight: bold">and discuss</span> the following more specific
+aspects:
+</p>
+
+<ol>
+<li>Bootstrapping the aforementioned tools and processes on a
+<span style="color: #1b91ff; font-weight: bold">user's</span> computer</li>
+
+<li>Automatically configuring Docker-based Jenkins slaves for
+continuous integration</li>
+
+</ol>
+
+</section>
+</section>
+<section>
+<section id="slide-org5f99d03">
+<h2 id="org5f99d03">Bootstrapping</h2>
+<div class="outline-text-2" id="text-org5f99d03">
+</div>
+</section>
+<section id="slide-bootstrapping-motivation">
+<h3 id="bootstrapping-motivation"><a id="orgfb682eb"></a>Bootstrapping &#x2013; Motivation</h3>
+<p>
+Scenario:
+</p>
+
+<ul>
+<li>User wants to <span style="color: #1b91ff; font-weight: bold">try out</span>, <span style="color: #1b91ff; font-weight: bold">reproduce</span>,
+<span style="color: #1b91ff; font-weight: bold">develop</span> or <span style="color: #1b91ff; font-weight: bold">learn</span> a continuous integration
+setup on their own machine</li>
+
+<li>Running Linux, Docker installed</li>
+
+<li>Doesn't want to modify or pollute system with lots of software</li>
+
+<li>Doesn't want to manually apply a long list of setup steps</li>
+
+</ul>
+
+<p data-fragment-index="2" class="fragment appear">
+The requirements are thus:
+</p>
+
+<ul>
+<li data-fragment-index="2" class="fragment appear">Initial download and installation should be minimal</li>
+
+<li data-fragment-index="2" class="fragment appear">From there, maximum automation, minimal number of manual steps</li>
+
+</ul>
+
+</section>
+<section id="slide-bootstrapping-process">
+<h3 id="bootstrapping-process"><a id="orgb3e7b8b"></a>Bootstrapping &#x2013; Process</h3>
+
+<div class="figure">
+<p><img src="figures/bootstrapping.png" alt="bootstrapping.png" />
+</p>
+</div>
+
+<aside class="notes">
+<dl>
+<dt>Rot</dt><dd>manuelle Schritte</dd>
+<dt>Grün</dt><dd>manuelle Schritte, die automatisiert werden könnten</dd>
+
+</dl>
+
+<p>
+wer macht was? was automatisch/manuell
+Wie lange dauern die phase
+</p>
+
+</aside>
+
+</section>
+<section id="slide-bootstrapping-demo" data-background="#e8e8ff">
+<h3 id="bootstrapping-demo"><a id="orgcb3ac0d"></a>Bootstrapping &#x2013; Demo</h3>
+<ul>
+<li>Get generator binary from <a href="https://github.com/rdtk/generator/releases">https://github.com/rdtk/generator/releases</a></li>
+
+<li><p>
+Install Jenkins
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">./build-generator install-jenkins        <span style="color: #d08928;">\</span>
+  --profile local-docker                 <span style="color: #d08928;">\</span>
+  -u jan -p test -e a@b.c                <span style="color: #d08928;">\</span>
+  install-test
+<span style="color: #808080; font-style: italic;"># </span><span style="color: #808080; font-style: italic;">Takes between 60 and 300 seconds</span>
+
+<span style="color: #b77fdb;">cd</span> install-test
+./start_jenkins
+</pre>
+</div></li>
+
+<li><p>
+Clone recipe repository
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">git clone -b wip-docker https://opensource.cit-ec.de/git/citk
+</pre>
+</div></li>
+
+<li><p>
+Generate Distribution Jobs
+</p>
+
+<pre  class="example">
+./build-generator generate                                       \
+  -u jan -p test                                                 \
+  -D 'view.create?=true' -D view.name='Demo 1'                   \
+  citk/distributions/build-generator-nightly.distribution
+</pre></li>
+
+<li>Result: <a href="https://localhost:8080/view/Demo%201/">https://localhost:8080/view/Demo 1/</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org352bae1">
+<h2 id="org352bae1">Docker-based Jenkins Slaves</h2>
+<div class="outline-text-2" id="text-org352bae1">
+</div>
+</section>
+<section id="slide-docker-slaves-motivation">
+<h3 id="docker-slaves-motivation"><a id="org3a4abb2"></a>Docker Slaves &#x2013; Motivation</h3>
+<p class="fragment appear">
+Build generator supports different targets/modes:
+</p>
+
+<ul>
+<li class="fragment appear">Jenkins jobs for continuous integration, deployment, mixture of
+both</li>
+
+<li class="fragment appear">Makefile, DockerFile</li>
+
+<li class="fragment appear"><span style="color: #1b91ff; font-weight: bold">Jenkins jobs using Docker slaves</span></li>
+
+</ul>
+
+<p class="fragment appear">
+Advantages of Docker slaves:
+</p>
+
+<ul>
+<li class="fragment appear">Full isolation between jobs and from host system (good for CI,
+reproducibility)</li>
+
+<li class="fragment appear">Install dependencies in container &#x2013; no side-effects on host
+system</li>
+
+<li class="fragment appear">Build, test on different Linux platforms independent of host</li>
+
+<li class="fragment appear"><span style="color: #606060">Share runnable systems as Docker images</span></li>
+
+</ul>
+
+</section>
+<section id="slide-docker-slaves-ci-process">
+<h3 id="docker-slaves-ci-process"><a id="orgffa3f3a"></a>Docker Slaves &#x2013; Process</h3>
+
+<div class="figure">
+<p><img src="figures/docker-process-ci-initial-setup.png" alt="docker-process-ci-initial-setup.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="figures/docker-process-ci-scm-trigger.png" alt="docker-process-ci-scm-trigger.png" />
+</p>
+</div>
+
+
+</section>
+<section id="slide-docker-slaves-demo" data-background="#e8e8ff">
+<h3 id="docker-slaves-demo"><a id="orgd02c3f2"></a>Docker Slaves &#x2013; Demo</h3>
+<ul>
+<li><p>
+Generate Distribution Jobs
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">./build-generator generate                                 <span style="color: #d08928;">\</span>
+  -u jan -p test                                           <span style="color: #d08928;">\</span>
+  -D <span style="color: #d08928;">'view.create?=true'</span> -D view.name=<span style="color: #d08928;">'Demo 2'</span>             <span style="color: #d08928;">\</span>
+  -m ci-docker                                             <span style="color: #d08928;">\</span>
+  citk/distributions/cogimon-core-nightly.distribution
+</pre>
+</div></li>
+
+<li>Result: <a href="https://localhost:8080/view/Demo%202/">https://localhost:8080/view/Demo 2/</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-thank-you" data-background="#204020">
+<h2 id="thank-you"><a id="org82f1010"></a>Thank You for Your Attention!</h2>
+<p>
+<span style="color: #1b91ff; font-weight: bold">Summary</span>
+</p>
+
+<ul>
+<li>General approach
+
+<ul>
+<li>System description model and language</li>
+
+<li>Dependency and metadata analysis</li>
+
+</ul></li>
+
+<li>Specific aspects
+
+<ul>
+<li>Build generator tool</li>
+
+<li>Bootstrapping</li>
+
+<li>Docker slave configuration</li>
+
+<li>Research software catalog</li>
+
+</ul></li>
+
+</ul>
+
+<p>
+<span style="color: #1b91ff; font-weight: bold">Questions?</span>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org4f28594">
+<h2 id="org4f28594">Backup Slides</h2>
+<div class="outline-text-2" id="text-org4f28594">
+</div>
+</section>
+<section id="slide-catalog-demo" data-background="#202040">
+<h3 id="catalog-demo"><a id="orga755121"></a>Catalog &#x2013; Demo</h3>
+<p>
+<a href="https://citkat-citec.bob.ci.cit-ec.net/browse/distribution/">https://citkat-citec.bob.ci.cit-ec.net/browse/distribution/</a>
+</p>
+
+</section>
+<section id="slide-docker-slaves-monolithic-process">
+<h3 id="docker-slaves-monolithic-process"><a id="orgb740715"></a>Docker Slaves &#x2013; Monolithic Process</h3>
+
+<div class="figure">
+<p><img src="figures/docker-process-monolithic.png" alt="docker-process-monolithic.png" />
+</p>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: false,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+pdfSeparateFragments: true,
+
+overview: true,
+margin: 0.00,
+minScale: 0.20,
+maxScale: 1.10,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'slide', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
